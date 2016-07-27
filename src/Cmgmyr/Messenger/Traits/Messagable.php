@@ -52,6 +52,9 @@ trait Messagable
     public function unreadThreads()
     {
         return $this->threads()
+            ->join(Models::table('messages'),
+                    Models::table('messages') . '.thread_id', '=',
+                    Models::table('threads') . '.id')
             ->whereRaw('(' . Models::table('threads') . '.updated_at > '
                     . Models::table('participants') . '.last_read'
                     . ' OR ' . Models::table('participants') . '.last_read IS NULL)');
