@@ -59,18 +59,20 @@ trait Messagable
     {
         return $this->threadsWithNewMessages()->count();
     }
-
+	
     /**
-     * Returns all threads with new messages.
+     * Unread threads as a relationship
      *
      * @return \Illuminate\Database\Eloquent\Relations\belongsToMany
      */
     public function threadsWithNewMessages()
     {
         return $this->threads()
-            ->where(function ($q) {
-                $q->whereNull(Models::table('participants') . '.last_read');
-                $q->orWhere(Models::table('threads') . '.updated_at', '>', $this->getConnection()->raw($this->getConnection()->getTablePrefix() . Models::table('participants') . '.last_read'));
-            })->get();
+            ->join(Models::table('messages'),
+                    Models::table('messages') . '.thread_id', '=',
+                    Models::table('threads') . '.id')
+            ->whereRaw('(' . Models::table('threads') . '.updated_at > '
+                    . Models::table('participants') . '.last_read'
+                    . ' OR ' . Models::table('participants') . '.last_read IS NULL)');
     }
 }
