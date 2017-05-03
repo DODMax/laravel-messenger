@@ -2,7 +2,6 @@
 
 namespace Cmgmyr\Messenger\Models;
 
-use App\User;
 use Illuminate\Database\Eloquent\Model as Eloquent;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -45,6 +44,8 @@ class Participant extends Eloquent
      * Thread relationship.
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     *
+     * @codeCoverageIgnore
      */
     public function thread()
     {
@@ -55,9 +56,11 @@ class Participant extends Eloquent
      * User relationship.
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     *
+     * @codeCoverageIgnore
      */
     public function user()
     {
-        return $this->belongsTo(Models::classname(User::class), 'user_id');
+        return $this->belongsTo(Models::user(), 'user_id');
     }
 }

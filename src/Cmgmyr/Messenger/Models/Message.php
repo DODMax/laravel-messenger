@@ -2,11 +2,13 @@
 
 namespace Cmgmyr\Messenger\Models;
 
-use App\User;
 use Illuminate\Database\Eloquent\Model as Eloquent;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Message extends Eloquent
 {
+    use SoftDeletes;
+
     /**
      * The database table used by the model.
      *
@@ -51,6 +53,8 @@ class Message extends Eloquent
      * Thread relationship.
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     *
+     * @codeCoverageIgnore
      */
     public function thread()
     {
@@ -61,16 +65,20 @@ class Message extends Eloquent
      * User relationship.
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     *
+     * @codeCoverageIgnore
      */
     public function user()
     {
-        return $this->belongsTo(Models::classname(User::class), 'user_id');
+        return $this->belongsTo(Models::user(), 'user_id');
     }
 
     /**
      * Participants relationship.
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     *
+     * @codeCoverageIgnore
      */
     public function participants()
     {

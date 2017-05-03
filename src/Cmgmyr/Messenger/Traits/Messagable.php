@@ -13,6 +13,8 @@ trait Messagable
      * Message relationship.
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     *
+     * @codeCoverageIgnore
      */
     public function messages()
     {
@@ -23,6 +25,8 @@ trait Messagable
      * Participants relationship.
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     *
+     * @codeCoverageIgnore
      */
     public function participants()
     {
@@ -33,6 +37,8 @@ trait Messagable
      * Thread relationship.
      *
      * @return \Illuminate\Database\Eloquent\Relations\belongsToMany
+     *
+     * @codeCoverageIgnore
      */
     public function threads()
     {
@@ -45,41 +51,26 @@ trait Messagable
     }
 
     /**
-     * Unread threads as a relationship
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\belongsToMany
-     */
-    public function unreadThreads()
-    {
-        return $this->threads()
-            ->join(Models::table('messages'),
-                    Models::table('messages') . '.thread_id', '=',
-                    Models::table('threads') . '.id')
-            ->whereRaw('(' . Models::table('threads') . '.updated_at > '
-                    . Models::table('participants') . '.last_read'
-                    . ' OR ' . Models::table('participants') . '.last_read IS NULL)');
-    }
-
-    /**
      * Returns the new messages count for user.
      *
      * @return int
      */
-    public function newMessagesCount()
+    public function newThreadsCount()
     {
-        return $this->unreadThreads()->count();
+        return $this->threadsWithNewMessages()->count();
     }
 
     /**
-     * Returns the id of all threads with new messages.
+     * Returns all threads with new messages.
      *
-     * @return array
+     * @return \Illuminate\Database\Eloquent\Relations\belongsToMany
      */
     public function threadsWithNewMessages()
     {
-        $threads = $this->unreadThreads()->lists(Models::table('threads') . '.id');
-
-        //Always return array (L5.0 vs L5.1 lists behaviour change)
-        return is_array($threads) ? $threads : $threads->all();
+        return $this->threads()
+            ->where(function ($q) {
+                $q->whereNull(Models::table('participants') . '.last_read');
+                $q->orWhere(Models::table('threads') . '.updated_at', '>', $this->getConnection()->raw($this->getConnection()->getTablePrefix() . Models::table('participants') . '.last_read'));
+            })->get();
     }
 }
